@@ -34,7 +34,7 @@ function close() {
 
 <template>
   <div v-if="visible" class="bg-black/50 flex items-center inset-0 justify-center fixed z-50" @click.self="close">
-    <div class="p-6 rounded-lg bg-white max-w-2xl w-full shadow-xl">
+    <div class="mx-4 p-6 rounded-lg bg-white max-w-2xl w-full shadow-xl">
       <h3 class="text-2xl font-bold mb-4">
         配置图片和描述
       </h3>

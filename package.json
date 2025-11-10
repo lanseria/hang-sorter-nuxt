@@ -31,6 +31,7 @@
     "typescript": "catalog:dev",
     "unocss": "catalog:build",
     "vue": "catalog:frontend",
+    "vue-draggable-plus": "catalog:frontend",
     "vue-tsc": "catalog:dev"
   },
   "resolutions": {

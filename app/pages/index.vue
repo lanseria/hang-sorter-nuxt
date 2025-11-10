@@ -23,8 +23,7 @@ const configuredItems = ref([
 
 const gameQueue = ref([])
 const currentItemIndex = ref(0)
-// 新增：用于在拖放操作之间传递数据
-const itemBeingDragged = ref(null)
+// itemBeingDragged 状态不再需要了
 
 // -- 计算属性 --
 
@@ -44,33 +43,16 @@ function startGame() {
     alert('请先完整配置图片和描述！')
     return
   }
+  // 清空所有分类中的项目
   categories.value.forEach(cat => cat.items = [])
+  // 深度克隆配置项到游戏队列
   gameQueue.value = JSON.parse(JSON.stringify(configuredItems.value))
   currentItemIndex.value = 0
   isGameStarted.value = true
 }
 
-// 当 DraggableImagePresenter 开始拖动时，记录下被拖动的数据
-function handleDragStart(item) {
-  itemBeingDragged.value = item
-}
-
-// 当 TierListTable 触发 drop 事件时，处理数据
-function handleItemDrop(targetCategory) {
-  // 安全检查：确保有数据正在被拖动
-  if (!itemBeingDragged.value)
-    return
-
-  // 找到 store 中对应的分类
-  const categoryInStore = categories.value.find(c => c.id === targetCategory.id)
-  if (categoryInStore) {
-    // 将被拖动的数据添加到目标分类的 items 数组中
-    categoryInStore.items.push(itemBeingDragged.value)
-  }
-
-  // 清理临时状态
-  itemBeingDragged.value = null
-
+// 当一个新项目被添加到任何一个分类时，此方法被调用
+function advanceGame() {
   // 推进游戏进程
   currentItemIndex.value++
 
@@ -83,23 +65,32 @@ function handleItemDrop(targetCategory) {
 </script>
 
 <template>
-  <div class="font-sans bg-gray-400 flex min-h-screen items-center justify-center overflow-hidden">
-    <ActionButtons
-      :is-configured="isConfigured"
-      :is-game-started="isGameStarted"
-      @open-config="isConfigModalOpen = true"
-      @start-game="startGame"
-    />
+  <div class="font-sans bg-gray-100 flex flex-col h-screen overflow-hidden">
+    <!-- 顶部 1/2：表格 -->
+    <div class="flex-none">
+      <TierListTable :categories="categories" @item-added="advanceGame" />
+    </div>
 
-    <TierListTable :categories="categories" @item-dropped="handleItemDrop" />
+    <!-- 中间：拖动元素展示区域 -->
+    <div class="flex-grow relative">
+      <!-- 只有当游戏开始且有当前图片时才渲染可拖动组件 -->
+      <DraggableImagePresenter
+        v-if="isGameStarted && currentImage"
+        :image="currentImage"
+      />
+    </div>
 
-    <!-- 只有当游戏开始且有当前图片时才渲染可拖动组件 -->
-    <DraggableImagePresenter
-      v-if="isGameStarted && currentImage"
-      :image="currentImage"
-      @drag-start="handleDragStart"
-    />
+    <!-- 底部：操作按钮 -->
+    <div class="flex-none">
+      <ActionButtons
+        :is-configured="isConfigured"
+        :is-game-started="isGameStarted"
+        @open-config="isConfigModalOpen = true"
+        @start-game="startGame"
+      />
+    </div>
 
+    <!-- 配置弹窗 -->
     <ConfigModal v-model:visible="isConfigModalOpen" v-model:items="configuredItems" />
   </div>
 </template>
