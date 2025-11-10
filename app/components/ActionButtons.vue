@@ -13,7 +13,7 @@ defineEmits(['open-config', 'start-game'])
       class="text-white font-semibold px-8 py-3 rounded-lg bg-blue-500 shadow-md transition hover:bg-blue-600"
       @click="$emit('open-config')"
     >
-      配置
+      选择配置
     </button>
     <button
       :disabled="!isConfigured || isGameStarted"

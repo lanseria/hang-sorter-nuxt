@@ -1,5 +1,10 @@
 <script setup>
-// -- 响应式状态定义 --
+// -- 初始化和状态定义 --
+const { getDefaultConfiguration } = useConfigurations()
+const defaultConfig = getDefaultConfiguration()
+
+const currentConfigName = ref(defaultConfig.name)
+const configuredItems = ref(JSON.parse(JSON.stringify(defaultConfig.items)))
 
 const categories = ref([
   { id: 1, name: '夯', color: '#ff7f7f', items: [] },
@@ -11,62 +16,55 @@ const categories = ref([
 
 const isConfigModalOpen = ref(false)
 const isGameStarted = ref(false)
-
-const configuredItems = ref([
-  { id: 1, url: 'https://placehold.co/600x400?text=Hang', desc: '夯' },
-  { id: 2, url: 'https://placehold.co/600x400?text=DJ', desc: '顶级' },
-  { id: 3, url: 'https://placehold.co/600x400?text=RSR', desc: '人上人' },
-  { id: 4, url: 'https://placehold.co/600x400?text=NPC', desc: 'NPC' },
-  { id: 5, url: 'https://placehold.co/600x400?text=LWL', desc: '拉完了' },
-])
-
 const gameQueue = ref([])
 const currentItemIndex = ref(0)
-// itemBeingDragged 状态不再需要了
 
 // -- 计算属性 --
-
 const isConfigured = computed(() => configuredItems.value.length > 0 && configuredItems.value.every(item => item.url && item.desc))
 
 const currentImage = computed(() => {
-  if (isGameStarted.value && currentItemIndex.value < gameQueue.value.length) {
+  if (isGameStarted.value && currentItemIndex.value < gameQueue.value.length)
     return gameQueue.value[currentItemIndex.value]
-  }
+
   return null
 })
 
 // -- 方法 --
-
 function startGame() {
   if (!isConfigured.value) {
-    showMessage('请先完整配置图片和描述！')
+    showMessage('请先选择一个有效的配置！', 'error')
     return
   }
-  // 清空所有分类中的项目
   categories.value.forEach(cat => cat.items = [])
-  // 深度克隆配置项到游戏队列
   gameQueue.value = JSON.parse(JSON.stringify(configuredItems.value))
   currentItemIndex.value = 0
   isGameStarted.value = true
+  showMessage('游戏开始！', 'success', 1500)
 }
 
-// 当一个新项目被添加到任何一个分类时，此方法被调用
 function advanceGame() {
-  // 推进游戏进程
   currentItemIndex.value++
-
-  // 检查游戏是否结束
   if (currentItemIndex.value >= gameQueue.value.length) {
     isGameStarted.value = false
-    setTimeout(() => showMessage('所有图片已放置完成！'), 100)
+    setTimeout(() => showMessage('所有图片已放置完成！', 'success'), 100)
   }
+}
+
+function handleConfigSelect(config) {
+  currentConfigName.value = config.name
+  configuredItems.value = JSON.parse(JSON.stringify(config.items))
+  isGameStarted.value = false // 更换配置后重置游戏状态
+  showMessage(`已切换到配置: ${config.name}`, 'success')
 }
 </script>
 
 <template>
   <div class="font-sans bg-gray-100 flex flex-col h-screen overflow-hidden">
-    <!-- 顶部 1/2：表格 -->
+    <!-- 顶部 1/2：表格和标题 -->
     <div class="flex-none">
+      <h1 class="text-2xl font-bold py-3 text-center bg-white shadow-md">
+        {{ currentConfigName }}
+      </h1>
       <TierListTable :categories="categories" @item-added="advanceGame" />
     </div>
 
@@ -90,6 +88,6 @@ function advanceGame() {
     </div>
 
     <!-- 配置弹窗 -->
-    <ConfigModal v-model:visible="isConfigModalOpen" v-model:items="configuredItems" />
+    <ConfigModal v-model:visible="isConfigModalOpen" @select-config="handleConfigSelect" />
   </div>
 </template>
