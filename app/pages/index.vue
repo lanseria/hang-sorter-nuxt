@@ -1,4 +1,3 @@
-<!-- eslint-disable no-alert -->
 <script setup>
 // -- 响应式状态定义 --
 
@@ -40,7 +39,7 @@ const currentImage = computed(() => {
 
 function startGame() {
   if (!isConfigured.value) {
-    alert('请先完整配置图片和描述！')
+    showMessage('请先完整配置图片和描述！')
     return
   }
   // 清空所有分类中的项目
@@ -59,7 +58,7 @@ function advanceGame() {
   // 检查游戏是否结束
   if (currentItemIndex.value >= gameQueue.value.length) {
     isGameStarted.value = false
-    setTimeout(() => alert('所有图片已放置完成！'), 100)
+    setTimeout(() => showMessage('所有图片已放置完成！'), 100)
   }
 }
 </script>

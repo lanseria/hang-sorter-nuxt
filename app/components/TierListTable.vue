@@ -37,6 +37,7 @@ function onItemAdded() {
         class="p-2 border-t border-gray-700 bg-gray-200 flex flex-wrap gap-2 h-24 content-start overflow-x-auto"
         :group="{ name: 'tier-items' }"
         :animation="150"
+        ghost-class="tier-item-ghost"
         @add="onItemAdded"
       >
         <!-- 渲染已放置的图片 -->
@@ -51,3 +52,16 @@ function onItemAdded() {
     </div>
   </div>
 </template>
+
+<style>
+.tier-item-ghost {
+  --at-apply: 'h-16 w-16 rounded bg-gray-400 opacity-50';
+}
+/*
+  确保 ghost 元素内部从原始拖动项继承来的内容 (如大图片和文字) 不会显示,
+  从而避免撑开 ghost 元素。
+*/
+.tier-item-ghost > * {
+  display: none;
+}
+</style>
